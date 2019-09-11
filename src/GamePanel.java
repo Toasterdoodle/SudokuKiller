@@ -72,18 +72,13 @@ public class GamePanel extends JPanel {
 
         repaint();
 
-//
 //        repaint();
-//
 //        testpuzzle[0][2].addCantVals(1);
-//
 //        testpuzzle[0][2].removePosValsFromCantVals();
-//
 //        updatePosVals();
-//
 //        repaint();
 
-        crack(0);
+        crack();
 
     }//end GamePanel
 
@@ -127,19 +122,28 @@ public class GamePanel extends JPanel {
     //note:
     //valsToRemove is an interesting list
     //it compiles a list of every attempted and failed possible value
-    public void crack(int i){
+    public void crack(){
 
+        //all of this gets run only at the beginning
         System.out.println("====================");
-
-        updatePosVals();
 
         repaint();
 
-        int r = i/9;
-        int c = i%9;
+        int i = 0;
+        int r;
+        int c;
+        int newI;
+        int prevC;
+        int prevR;
 
         //checking if you haven't won the game yet
-        if(i < 82) {
+        //==========!!!LOOP BEGINS HERE!!!==========
+        while(i < 81) {
+
+            updatePosVals();
+
+            r = i/9;
+            c = i%9;
 
             System.out.println("i: " + i);
             System.out.println("coords: (" + r + ", " + c + ")");
@@ -153,6 +157,9 @@ public class GamePanel extends JPanel {
                 }//end for
                 System.out.println();
 
+                //removing cantvals from list of posvals
+                //yes the name is backwards I know
+                //I'm too lazy to go and fix it
                 testpuzzle[r][c].removePosValsFromCantVals();
 
                 //printing posvals
@@ -172,20 +179,21 @@ public class GamePanel extends JPanel {
 
                     printPuzzle(testpuzzle);
 
-                    //calls crack method again
-                    crack(i + 1);
+                    //changes the value of i, and then while loop should cycle here
+                    i = i+1;
 
                 } else {
                     System.out.println("No possible values detected at (" + r + ", " + c + ")" + " Reverting to previous cell.");
                     //if there are no possible values for the selected square, you have to go back
 
-                    int newI = i-1;
-
-                    int prevR = newI/9;
-                    int prevC = newI%9;
+                    //reverting to previous index and calculating new cell index
+                    newI = i-1;
+                    prevR = newI/9;
+                    prevC = newI%9;
 
                     System.out.println("Is previous value given: " + testpuzzle[prevR][prevC].isGiven());
 
+                    //looks for a non-given cell
                     while(testpuzzle[prevR][prevC].isGiven() == true){
 
                         System.out.println("looking for non-given value...");
@@ -200,26 +208,36 @@ public class GamePanel extends JPanel {
 
                     System.out.println("newi: " + newI);
 
+                    //resetting stuff
+
+                    //previous value cannot be tested value since it leads to a dead end
+                    //therefore, the cantvals of the given cell is updated
                     testpuzzle[prevR][prevC].addCantVals(testpuzzle[prevR][prevC].getCurVal());
+
+                    //erasing the previous cell
                     testpuzzle[prevR][prevC].setCurVal(0);
+
+                    //resetting the can't vals of the tested square
                     testpuzzle[r][c].resetCantVals();
+
+                    //resetting all possible values due to a recycling
+                    //could probably work with just resetting the values of (r,c) and (rPrev, cPrev)
+                    //But I'm too lazy to check
                     resetAllPosVals();
 
-                    crack(newI);
+                    i = newI;
 
                 }//end if else
 
             }else{
 
-                crack(i+1);
+                i = i+1;
 
             }//end if else
 
-        } else{
+        }//end if
 
-            System.out.println("Finished Cracking");
-
-        }//end if else
+        System.out.println("Finished Cracking");
 
     }//end crack
 
